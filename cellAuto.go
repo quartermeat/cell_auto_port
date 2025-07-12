@@ -229,10 +229,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, cell := range g.cells {
 		x := float64(cell.X * cellSize)
 		y := float64(cell.Y * cellSize)
-		screenX := int((x - g.cameraX)*g.zoom + cx)
-		screenY := int((y - g.cameraY)*g.zoom + cy)
+		screenX := (x - g.cameraX)*g.zoom + cx
+		screenY := (y - g.cameraY)*g.zoom + cy
 
-		if screenX >= 0 && screenX < screenW && screenY >= 0 && screenY < screenH {
+		if screenX >= 0 && screenX < float64(screenW) && screenY >= 0 && screenY < float64(screenH) {
 			var col color.Color
 			switch cell.Type {
 			case Life:
@@ -242,7 +242,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				col = color.RGBA{0, 255, 0, 255}
 				zombieCount++
 			}
-			ebitenutil.DrawRect(screen, float64(screenX), float64(screenY), 1, 1, col)
+
+			// Scale and center cell size based on zoom
+			size := math.Max(1.0, float64(cellSize)*g.zoom)
+			offset := (size - float64(cellSize)) / 2
+			ebitenutil.DrawRect(screen, screenX-offset, screenY-offset, size, size, col)
 		}
 	}
 
